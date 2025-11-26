@@ -8,11 +8,6 @@ use App\Models\Enrollment;
 
 class ProfileController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     public function index()
     {
         $user = Auth::user();
@@ -25,19 +20,27 @@ class ProfileController extends Controller
             ->where('student_id', $user->id)
             ->get();
 
-        return view('student.profile', compact('user', 'enrollments'));
+        return view('profile', compact('user', 'enrollments'));
     }
 
     public function edit()
     {
         $user = Auth::user();
         
+        if (!$user) {
+            return redirect('/login');
+        }
+
         return view('student.edit-profile', compact('user'));
     }
 
     public function update(Request $request)
     {
         $user = Auth::user();
+
+        if (!$user) {
+            return redirect('/login');
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -46,7 +49,7 @@ class ProfileController extends Controller
 
         $user->update($validated);
 
-        return redirect()->route('profile.index')
+        return redirect()->route('profile')
             ->with('success', 'Profile updated successfully.');
     }
 }

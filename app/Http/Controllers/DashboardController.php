@@ -4,17 +4,17 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\Enrollment;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     public function index()
     {
         $user = Auth::user();
+
+        if (!$user) {
+            return redirect('/login');
+        }
 
         $enrollments = Enrollment::with('course')
             ->where('student_id', $user->id)
