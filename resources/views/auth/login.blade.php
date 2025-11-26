@@ -8,7 +8,7 @@
 
 <div class="bg-white p-8 rounded-xl shadow-lg w-96">
     <h1 class="text-2xl font-bold mb-4 text-center text-red-600">
-        BatStateU Grade Tracker
+        CICS Grade Tracker
     </h1>
 
     @if ($errors->any())

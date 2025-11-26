@@ -15,7 +15,7 @@ class LoginController extends Controller
 
     public function authenticate(Request $request)
     {
-        $request->validate([
+        $credentials = $request->validate([
             'email' => [
                 'required',
                 'email',
@@ -26,10 +26,22 @@ class LoginController extends Controller
             'email.regex' => 'You must use a valid BatState-U GSuite email.'
         ]);
 
-        if (Auth::attempt($request->only('email', 'password'))) {
-            return redirect('/dashboard');
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            return redirect()->intended('/dashboard');
         }
 
-        return redirect()->back()->withErrors(['email' => 'Invalid login credentials']);
+        return redirect()->back()
+            ->withInput($request->only('email'))
+            ->withErrors(['email' => 'Invalid login credentials']);
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return redirect('/login');
     }
 }
