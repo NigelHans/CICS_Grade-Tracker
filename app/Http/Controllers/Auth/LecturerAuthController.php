@@ -6,11 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class LoginController extends Controller
+class LecturerAuthController extends Controller
 {
     public function showLogin()
     {
-        return view('auth.login');
+        return view('auth.lecturer-login');
     }
 
     public function authenticate(Request $request)
@@ -23,12 +23,12 @@ class LoginController extends Controller
             ],
             'password' => 'required'
         ], [
-            'email.regex' => 'You must use a valid BatState-U GSuite email (@g.batstate-u.edu.ph).'
+            'email.regex' => 'You must use a valid BatState-U GSuite email.'
         ]);
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended('/student/dashboard');
+            return redirect()->intended('/lecturer/dashboard');
         }
 
         return redirect()->back()
