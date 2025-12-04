@@ -13,6 +13,14 @@ return new class extends Migration
     {
         Schema::create('enrollments', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('student_id')->constrained('users');
+            $table->foreignId('course_id')->constrained('courses');
+            $table->decimal('grade', 5, 2)->nullable();
+            $table->decimal('current_grade', 5, 2)->nullable();
+            $table->decimal('expected_grade', 5, 2)->nullable();
+            $table->string('status')->default('active');
+            $table->timestamp('enrollment_date')->useCurrent();
+            $table->timestamp('completion_date')->nullable();
             $table->timestamps();
         });
     }

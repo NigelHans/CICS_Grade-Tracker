@@ -63,9 +63,12 @@ class LecturerDashboardController extends Controller
             ->where('course_id', $courseId)
             ->get();
 
-        $classAverage = $students->pluck('grade')->filter()->avg();
+        $grades = $students->pluck('grade')->filter();
+        $classAverage = $grades->count() > 0 ? round($grades->avg(), 2) : 0;
+        $passCount = $grades->filter(fn($g) => $g >= 60)->count();
+        $failCount = $grades->filter(fn($g) => $g < 60)->count();
 
-        return view('lecturer.class-view', compact('lecturer', 'course', 'students', 'classAverage'));
+        return view('lecturer.class-view', compact('lecturer', 'course', 'students', 'classAverage', 'passCount', 'failCount'));
     }
 
     /**
@@ -173,22 +176,35 @@ class LecturerDashboardController extends Controller
         $enrollments = $course->enrollments()->get();
         $grades = $enrollments->pluck('grade')->filter();
 
-        $analytics = [
-            'total_students' => $enrollments->count(),
-            'graded_students' => $grades->count(),
-            'average_grade' => $grades->count() > 0 ? round($grades->avg(), 2) : 0,
-            'pass_rate' => $grades->count() > 0 ? round(($grades->filter(fn($g) => $g >= 60)->count() / $grades->count()) * 100, 1) : 0,
-            'fail_rate' => $grades->count() > 0 ? round(($grades->filter(fn($g) => $g < 60)->count() / $grades->count()) * 100, 1) : 0,
-            'grade_distribution' => [
-                'A' => $grades->filter(fn($g) => $g >= 90)->count(),
-                'B' => $grades->filter(fn($g) => $g >= 80 && $g < 90)->count(),
-                'C' => $grades->filter(fn($g) => $g >= 70 && $g < 80)->count(),
-                'D' => $grades->filter(fn($g) => $g >= 60 && $g < 70)->count(),
-                'F' => $grades->filter(fn($g) => $g < 60)->count(),
-            ]
+        $gradeCount = $grades->count();
+        $averageGrade = $gradeCount > 0 ? round($grades->avg(), 2) : 0;
+        $passRate = $gradeCount > 0 ? round(($grades->filter(fn($g) => $g >= 60)->count() / $gradeCount) * 100, 1) : 0;
+        $passCount = $grades->filter(fn($g) => $g >= 60)->count();
+        $failCount = $grades->filter(fn($g) => $g < 60)->count();
+        $failRate = $gradeCount > 0 ? round(($failCount / $gradeCount) * 100, 1) : 0;
+
+        $gradeDistribution = [
+            'A' => $grades->filter(fn($g) => $g >= 90)->count(),
+            'B' => $grades->filter(fn($g) => $g >= 80 && $g < 90)->count(),
+            'C' => $grades->filter(fn($g) => $g >= 70 && $g < 80)->count(),
+            'D' => $grades->filter(fn($g) => $g >= 60 && $g < 70)->count(),
+            'F' => $grades->filter(fn($g) => $g < 60)->count(),
         ];
 
-        return view('lecturer.analytics', compact('lecturer', 'course', 'analytics', 'enrollments'));
+        // Calculate variance (expected vs actual)
+        $exceedingCount = $enrollments->filter(fn($e) => $e->grade && $e->expected_grade && $e->grade > $e->expected_grade)->count();
+        $meetingCount = $enrollments->filter(fn($e) => $e->grade && $e->expected_grade && $e->grade == $e->expected_grade)->count();
+        $belowCount = $enrollments->filter(fn($e) => $e->grade && $e->expected_grade && $e->grade < $e->expected_grade)->count();
+        
+        $exceedingEnrollments = $enrollments->filter(fn($e) => $e->grade && $e->expected_grade && $e->grade > $e->expected_grade);
+        $avgExceeding = $exceedingEnrollments->count() > 0 ? round($exceedingEnrollments->avg('grade') - $exceedingEnrollments->avg('expected_grade'), 2) : 0;
+        
+        $belowEnrollments = $enrollments->filter(fn($e) => $e->grade && $e->expected_grade && $e->grade < $e->expected_grade);
+        $avgBelow = $belowEnrollments->count() > 0 ? round($belowEnrollments->avg('grade') - $belowEnrollments->avg('expected_grade'), 2) : 0;
+
+        $lowPerformers = $enrollments->filter(fn($e) => $e->grade && $e->grade < 60);
+
+        return view('lecturer.analytics', compact('lecturer', 'course', 'averageGrade', 'passRate', 'passCount', 'failCount', 'failRate', 'gradeCount', 'gradeDistribution', 'exceedingCount', 'meetingCount', 'belowCount', 'avgExceeding', 'avgBelow', 'lowPerformers'));
     }
 
     // Legacy methods for backward compatibility
