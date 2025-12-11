@@ -52,11 +52,11 @@ class TestAccountsSeeder extends Seeder
                 'room' => 'A-101',
                 'lecturer_id' => $lecturer->id,
                 'syllabus' => json_encode([
-                    ['name' => 'Attendance', 'percentage' => 10],
-                    ['name' => 'Participation', 'percentage' => 20],
-                    ['name' => 'Midterm Exam', 'percentage' => 30],
-                    ['name' => 'Final Project', 'percentage' => 20],
-                    ['name' => 'Final Exam', 'percentage' => 20],
+                    ['name' => 'Attendance', 'percentage' => 10, 'max_points' => 10],
+                    ['name' => 'Participation', 'percentage' => 20, 'max_points' => 20],
+                    ['name' => 'Midterm Exam', 'percentage' => 30, 'max_points' => 100],
+                    ['name' => 'Final Project', 'percentage' => 20, 'max_points' => 50],
+                    ['name' => 'Final Exam', 'percentage' => 20, 'max_points' => 100],
                 ])
             ]
         );
@@ -72,10 +72,10 @@ class TestAccountsSeeder extends Seeder
                 'room' => 'A-102',
                 'lecturer_id' => $lecturer->id,
                 'syllabus' => json_encode([
-                    ['name' => 'Quizzes', 'percentage' => 15],
-                    ['name' => 'Assignments', 'percentage' => 25],
-                    ['name' => 'Midterm Exam', 'percentage' => 25],
-                    ['name' => 'Final Project', 'percentage' => 35],
+                    ['name' => 'Quizzes', 'percentage' => 15, 'max_points' => 60],
+                    ['name' => 'Assignments', 'percentage' => 25, 'max_points' => 40],
+                    ['name' => 'Midterm Exam', 'percentage' => 25, 'max_points' => 100],
+                    ['name' => 'Final Project', 'percentage' => 35, 'max_points' => 150],
                 ])
             ]
         );

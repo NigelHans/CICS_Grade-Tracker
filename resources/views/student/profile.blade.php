@@ -133,10 +133,78 @@
 
                 <!-- Edit Profile Button -->
                 <div style="margin-bottom: 30px;">
-                    <button class="btn btn-primary" style="padding: 10px 30px; font-size: 16px;">Edit Profile</button>
+                    <button class="btn btn-primary" style="padding: 10px 30px; font-size: 16px;" onclick="toggleEditMode()">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                    <button class="btn btn-danger" id="cancelBtn" style="padding: 10px 30px; font-size: 16px; display: none;" onclick="toggleEditMode()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
                     <a href="{{ route('student.dashboard') }}" class="btn btn-secondary" style="padding: 10px 30px; font-size: 16px;">Back to Dashboard</a>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Edit Profile</h3>
+            <button class="modal-close" onclick="closeEditModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <form id="editForm" method="POST" action="{{ route('student.update-profile') }}">
+                @csrf
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" class="form-control" name="name" value="{{ $student->name }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Student ID / SR Code</label>
+                    <input type="text" class="form-control" name="student_id" value="{{ $student->student_id ?? '' }}" placeholder="e.g., 23-07848">
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" class="form-control" name="email" value="{{ $student->email }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Contact Number</label>
+                    <input type="tel" class="form-control" name="phone" value="{{ $student->phone ?? '' }}" placeholder="e.g., +63 9XX XXX XXXX">
+                </div>
+
+                <div class="form-group">
+                    <label>Department</label>
+                    <input type="text" class="form-control" name="department" value="{{ $student->department ?? 'Computer Science' }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Year Level</label>
+                    <select class="form-control" name="year_level">
+                        <option value="1st Year" {{ $student->year_level == '1st Year' ? 'selected' : '' }}>1st Year</option>
+                        <option value="2nd Year" {{ $student->year_level == '2nd Year' ? 'selected' : '' }}>2nd Year</option>
+                        <option value="3rd Year" {{ $student->year_level == '3rd Year' ? 'selected' : '' }}>3rd Year</option>
+                        <option value="4th Year" {{ $student->year_level == '4th Year' ? 'selected' : '' }}>4th Year</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Program</label>
+                    <input type="text" class="form-control" name="program" value="{{ $student->program ?? 'BS Computer Science' }}">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" style="padding: 10px 30px;">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <button type="button" class="btn btn-secondary" style="padding: 10px 30px;" onclick="closeEditModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -304,5 +372,170 @@
     .badge {
         display: inline-block;
     }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-content {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        padding: 20px;
+        background-color: #007bff;
+        color: white;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 20px;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 28px;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+    }
+
+    .modal-close:hover {
+        opacity: 0.8;
+    }
+
+    .modal-body {
+        padding: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+    }
+
+    .btn {
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
 </style>
+
+<script>
+    function toggleEditMode() {
+        const modal = document.getElementById('editModal');
+        modal.classList.toggle('show');
+    }
+
+    function closeEditModal() {
+        const modal = document.getElementById('editModal');
+        modal.classList.remove('show');
+    }
+
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+        const modal = document.getElementById('editModal');
+        if (event.target === modal) {
+            modal.classList.remove('show');
+        }
+    }
+
+    // Handle form submission
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('editForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                // The form will submit normally via POST
+                this.submit();
+            });
+        }
+    });
+</script>
 @endsection

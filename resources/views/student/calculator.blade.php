@@ -41,11 +41,11 @@
             </div>
 
             <div class="row">
-                <!-- GPA Display -->
+                <!-- Left Column: Overall GPA -->
                 <div class="col-md-4">
                     <div class="gpa-card">
-                        <h2>Your GPA</h2>
-                        <div class="gpa-value">{{ $gpa }}</div>
+                        <h2>Your Overall GPA</h2>
+                        <div class="gpa-value">{{ number_format($gpa, 2) }}</div>
                         <p class="gpa-scale">on a 4.0 scale</p>
                         <div class="gpa-progress">
                             <div class="progress-bar" style="width: {{ ($gpa / 4.0) * 100 }}%; background-color: {{ $gpa >= 3.5 ? '#28a745' : ($gpa >= 3.0 ? '#ffc107' : '#dc3545') }};"></div>
@@ -82,11 +82,66 @@
                     </div>
                 </div>
 
-                <!-- Detailed Calculation -->
+                <!-- Right Column: Component Calculator -->
                 <div class="col-md-8">
                     <div class="card">
+                        <div class="card-header" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);">
+                            <h4 style="margin: 0; color: white;">Component Grade Calculator</h4>
+                            <p style="margin: 8px 0 0 0; font-size: 12px; color: #e3f2fd;">Select a course and input component scores to calculate your final grade</p>
+                        </div>
+                        <div class="card-body">
+                            @if($enrollments->count() > 0)
+                                <!-- Course Selector -->
+                                <div style="margin-bottom: 25px;">
+                                    <label for="courseSelect" style="display: block; margin-bottom: 8px; font-weight: bold; color: #333; font-size: 15px;">Select Course:</label>
+                                    <select id="courseSelect" class="form-control" onchange="loadComponentInputs()" style="padding: 12px; font-size: 14px; border: 2px solid #ddd; border-radius: 5px;">
+                                        @foreach($enrollments as $enrollment)
+                                            <option value="{{ $enrollment->id }}" data-syllabus="{{ htmlspecialchars(json_encode(json_decode($enrollment->course->syllabus, true) ?? [])) }}">
+                                                {{ $enrollment->course->course_code }} - {{ $enrollment->course->course_title }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Input Form Section -->
+                                <div id="componentsSection" style="display: block; margin-top: 25px;">
+                                    <h5 style="color: #333; margin-bottom: 25px; font-weight: bold; font-size: 16px;">Enter Your Scores</h5>
+                                    
+                                    <div id="componentsList" style="display: grid; gap: 18px; margin-bottom: 40px;">
+                                        <!-- Input fields will be generated here by JavaScript -->
+                                    </div>
+
+                                    <!-- Results Display -->
+                                    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 30px; border-radius: 8px; border: 1px solid #ddd;">
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                                            <!-- Final Grade -->
+                                            <div style="background: white; padding: 20px; border-radius: 8px; text-align: center; border: 2px solid #007bff;">
+                                                <div style="color: #666; font-size: 11px; margin-bottom: 12px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Final Grade</div>
+                                                <div style="font-size: 56px; font-weight: bold; color: #007bff; line-height: 1;">
+                                                    <span id="finalGrade">--</span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Letter Grade -->
+                                            <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
+                                                <div style="color: #666; font-size: 11px; margin-bottom: 12px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Letter Grade</div>
+                                                <div id="letterGrade" style="font-size: 56px; font-weight: bold; color: white; background-color: #999; border-radius: 8px; padding: 10px; line-height: 1.2;">
+                                                    --
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @else
+                                <p style="text-align: center; color: #666; padding: 40px;">No courses enrolled yet.</p>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Current Grades Table -->
+                    <div class="card" style="margin-top: 25px;">
                         <div class="card-header">
-                            <h4 style="margin: 0;">Grade Breakdown by Course</h4>
+                            <h4 style="margin: 0;">Current Grades</h4>
                         </div>
                         <div class="card-body">
                             @if($enrollments->count() > 0)
@@ -96,8 +151,8 @@
                                             <tr>
                                                 <th>Course Code</th>
                                                 <th>Course Title</th>
-                                                <th>Numeric Grade</th>
-                                                <th>Letter Grade</th>
+                                                <th>Grade</th>
+                                                <th>Letter</th>
                                                 <th>GPA Points</th>
                                                 <th>Credits</th>
                                             </tr>
@@ -105,7 +160,7 @@
                                         <tbody>
                                             @foreach($enrollments as $enrollment)
                                                 @php
-                                                    $numGrade = $enrollment->grade;
+                                                    $numGrade = $enrollment->grade ?? 0;
                                                     if ($numGrade >= 90) {
                                                         $letterGrade = 'A';
                                                         $gpaPoints = 4.0;
@@ -135,9 +190,13 @@
                                                 <tr>
                                                     <td><strong>{{ $enrollment->course->course_code ?? 'N/A' }}</strong></td>
                                                     <td>{{ $enrollment->course->course_title ?? 'N/A' }}</td>
-                                                    <td>{{ $numGrade }}</td>
                                                     <td>
-                                                        <span class="letter-grade-badge" style="background-color: {{ $numGrade >= 75 ? '#28a745' : ($numGrade >= 60 ? '#ffc107' : '#dc3545') }};">
+                                                        <span style="background-color: {{ $numGrade >= 75 ? '#28a745' : ($numGrade >= 60 ? '#ffc107' : '#dc3545') }}; padding: 5px 10px; border-radius: 3px; color: white; font-weight: bold;">
+                                                            {{ $numGrade }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span style="background-color: {{ $numGrade >= 75 ? '#28a745' : ($numGrade >= 60 ? '#ffc107' : '#dc3545') }}; padding: 5px 10px; border-radius: 3px; color: white;">
                                                             {{ $letterGrade }}
                                                         </span>
                                                     </td>
@@ -148,26 +207,8 @@
                                         </tbody>
                                     </table>
                                 </div>
-
-                                <!-- Statistics -->
-                                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
-                                    <h5>Summary Statistics</h5>
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <p><strong>Total Courses:</strong> {{ $enrollments->count() }}</p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <p><strong>Average Numeric Grade:</strong> {{ number_format($enrollments->avg('grade'), 2) }}</p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <p><strong>Recent Trend:</strong> {{ number_format($trend, 2) }}</p>
-                                        </div>
-                                    </div>
-                                </div>
                             @else
-                                <div style="text-align: center; padding: 40px;">
-                                    <p style="color: #666; font-size: 16px;">No grades available yet to calculate GPA.</p>
-                                </div>
+                                <p style="text-align: center; color: #666;">No grades available</p>
                             @endif
                         </div>
                     </div>
@@ -373,6 +414,58 @@
         font-size: 14px;
     }
 
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    }
+
+    .component-group {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+
+    .component-input {
+        display: flex;
+        gap: 15px;
+        align-items: flex-end;
+    }
+
+    .component-input input {
+        width: 100px;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 13px;
+    }
+
+    .component-input input:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+
     .btn {
         border: none;
         cursor: pointer;
@@ -396,4 +489,108 @@
         background-color: #c82333;
     }
 </style>
+
+<script>
+    function loadComponentInputs() {
+        const courseSelect = document.getElementById('courseSelect');
+        if (!courseSelect) return;
+        
+        const selected = courseSelect.options[courseSelect.selectedIndex];
+        if (!selected || !selected.value) return;
+
+        try {
+            const syllabusStr = selected.getAttribute('data-syllabus');
+            const syllabus = JSON.parse(decodeURIComponent(syllabusStr.replace(/&quot;/g, '"')));
+            const componentsList = document.getElementById('componentsList');
+            
+            if (!componentsList) return;
+            
+            componentsList.innerHTML = '';
+
+            if (!syllabus || syllabus.length === 0) {
+                componentsList.innerHTML = '<p style="color: #999; padding: 20px; text-align: center;">No components defined</p>';
+                return;
+            }
+
+            syllabus.forEach(component => {
+                const maxPoints = component.max_points || 100;
+                const html = `
+                    <div style="display: grid; grid-template-columns: 1fr 140px; gap: 20px; align-items: center; padding: 18px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px;">
+                        <div>
+                            <div style="font-weight: 600; color: #222; font-size: 15px; margin-bottom: 4px;">${component.name}</div>
+                            <div style="color: #666; font-size: 13px;">${component.percentage}% of grade</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="number" class="component-score" min="0" max="${maxPoints}" step="0.01" placeholder="0" data-percentage="${component.percentage}" data-max-points="${maxPoints}" onchange="calculateFinalGrade()" oninput="calculateFinalGrade()" style="width: 100%; padding: 10px; border: 2px solid #007bff; border-radius: 5px; font-size: 16px; font-weight: bold; text-align: center; box-sizing: border-box;">
+                            <span style="color: #999; font-weight: bold; min-width: 50px;">/${maxPoints}</span>
+                        </div>
+                    </div>
+                `;
+                componentsList.insertAdjacentHTML('beforeend', html);
+            });
+
+        } catch (error) {
+            console.error('Error loading components:', error);
+        }
+    }
+
+    // Load on page load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadComponentInputs);
+    } else {
+        loadComponentInputs();
+    }
+
+    // Load when course changes
+    document.addEventListener('change', function(e) {
+        if (e.target.id === 'courseSelect') {
+            loadComponentInputs();
+        }
+    });
+
+    function calculateFinalGrade() {
+        const inputs = document.querySelectorAll('.component-score');
+        let total = 0;
+        let count = 0;
+
+        inputs.forEach(input => {
+            const val = parseFloat(input.value);
+            const pct = parseFloat(input.getAttribute('data-percentage'));
+            const maxPoints = parseFloat(input.getAttribute('data-max-points')) || 100;
+            
+            if (!isNaN(val) && input.value !== '') {
+                // Convert score to percentage, then apply weight
+                const percentage = (val / maxPoints) * 100;
+                total += (percentage * pct) / 100;
+                count++;
+            }
+        });
+
+        const finalEl = document.getElementById('finalGrade');
+        const letterEl = document.getElementById('letterGrade');
+        
+        if (count === 0) {
+            finalEl.textContent = '--';
+            letterEl.textContent = '--';
+            letterEl.style.backgroundColor = '#999';
+            return;
+        }
+
+        const grade = total.toFixed(2);
+        finalEl.textContent = grade;
+
+        let letter, color;
+        if (grade >= 90) { letter = 'A'; color = '#28a745'; }
+        else if (grade >= 85) { letter = 'A-'; color = '#28a745'; }
+        else if (grade >= 80) { letter = 'B+'; color = '#17a2b8'; }
+        else if (grade >= 75) { letter = 'B'; color = '#17a2b8'; }
+        else if (grade >= 70) { letter = 'B-'; color = '#ffc107'; }
+        else if (grade >= 65) { letter = 'C+'; color = '#ffc107'; }
+        else if (grade >= 60) { letter = 'C'; color = '#fd7e14'; }
+        else { letter = 'F'; color = '#dc3545'; }
+
+        letterEl.textContent = letter;
+        letterEl.style.backgroundColor = color;
+    }
+</script>
 @endsection

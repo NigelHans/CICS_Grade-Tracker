@@ -32,6 +32,7 @@ Route::middleware('auth')->group(function () {
     // Student Dashboard routes
     Route::get('/student/dashboard', [StudentDashboardController::class, 'dashboard'])->name('student.dashboard');
     Route::get('/student/profile', [StudentDashboardController::class, 'profile'])->name('student.profile');
+    Route::post('/student/profile/update', [StudentDashboardController::class, 'updateProfile'])->name('student.update-profile');
     Route::get('/student/grades', [StudentDashboardController::class, 'grades'])->name('student.grades');
     Route::get('/student/courses', [StudentDashboardController::class, 'courses'])->name('student.courses');
     Route::get('/student/calculator', [StudentDashboardController::class, 'calculator'])->name('student.calculator');

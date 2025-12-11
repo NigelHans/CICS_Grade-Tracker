@@ -95,7 +95,9 @@
                                             </p>
                                         @endif
                                     </div>
-                                    <a href="#" class="view-details-btn">View Details →</a>
+                                    <button type="button" class="view-details-btn" onclick="showSyllabus('{{ $enrollment->id }}', '{{ $enrollment->course->course_code }}', '{{ addslashes($enrollment->course->syllabus) }}')">
+                                        <i class="fas fa-file-alt"></i> View Syllabus →
+                                    </button>
                                 </div>
                             @endforeach
                         </div>
@@ -352,5 +354,191 @@
     .btn-danger:hover {
         background-color: #c82333;
     }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-content {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        padding: 20px;
+        background-color: #007bff;
+        color: white;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 20px;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 28px;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-close:hover {
+        opacity: 0.8;
+    }
+
+    .modal-body {
+        padding: 25px;
+    }
+
+    .syllabus-component {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        border-left: 4px solid #007bff;
+    }
+
+    .syllabus-component h5 {
+        margin: 0 0 8px 0;
+        color: #333;
+        font-weight: bold;
+    }
+
+    .syllabus-component p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .component-percentage {
+        display: inline-block;
+        background-color: #007bff;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 3px;
+        font-size: 12px;
+        font-weight: bold;
+        margin-left: 10px;
+    }
 </style>
+
+<!-- Syllabus Modal -->
+<div id="syllabusModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Course Syllabus</h3>
+            <button class="modal-close" onclick="closeSyllabus()">×</button>
+        </div>
+        <div class="modal-body">
+            <div id="syllabusContent">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showSyllabus(enrollmentId, courseCode, syllabusStr) {
+        try {
+            const syllabus = JSON.parse(syllabusStr);
+            const modal = document.getElementById('syllabusModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const content = document.getElementById('syllabusContent');
+
+            modalTitle.textContent = `${courseCode} - Course Syllabus`;
+
+            if (!syllabus || syllabus.length === 0) {
+                content.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No assessment components defined for this course.</p>';
+            } else {
+                let html = '<div style="margin-bottom: 20px;"><h5 style="margin-top: 0; color: #333;">Assessment Components</h5>';
+                
+                syllabus.forEach(component => {
+                    const maxPoints = component.max_points ? ` (${component.max_points} points)` : '';
+                    html += `
+                        <div class="syllabus-component">
+                            <h5>
+                                ${component.name}
+                                <span class="component-percentage">${component.percentage}%${maxPoints}</span>
+                            </h5>
+                            <p>${component.description || 'No description provided'}</p>
+                        </div>
+                    `;
+                });
+
+                let totalPercentage = syllabus.reduce((sum, c) => sum + parseFloat(c.percentage || 0), 0);
+                html += `</div><div style="padding: 15px; background-color: #f0f0f0; border-radius: 5px; text-align: right;">
+                    <strong>Total Assessment Weight: ${totalPercentage}%</strong>
+                </div>`;
+
+                content.innerHTML = html;
+            }
+
+            modal.classList.add('show');
+        } catch (error) {
+            console.error('Error parsing syllabus:', error);
+            const modal = document.getElementById('syllabusModal');
+            const content = document.getElementById('syllabusContent');
+            content.innerHTML = '<p style="color: #dc3545;">Error loading syllabus data. Please try again.</p>';
+            modal.classList.add('show');
+        }
+    }
+
+    function closeSyllabus() {
+        document.getElementById('syllabusModal').classList.remove('show');
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('syllabusModal');
+        if (event.target === modal) {
+            modal.classList.remove('show');
+        }
+    }
+</script>
 @endsection

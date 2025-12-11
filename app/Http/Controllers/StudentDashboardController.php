@@ -88,7 +88,7 @@ class StudentDashboardController extends Controller
     }
 
     /**
-     * Show GPA calculator
+     * Show GPA calculator with course breakdown
      */
     public function calculator()
     {
@@ -119,6 +119,29 @@ class StudentDashboardController extends Controller
             'gradeDistribution',
             'trend'
         ));
+    }
+
+    /**
+     * Update student profile
+     */
+    public function updateProfile(Request $request)
+    {
+        $student = Auth::user();
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $student->id,
+            'student_id' => 'nullable|string|max:50',
+            'phone' => 'nullable|string|max:20',
+            'department' => 'nullable|string|max:255',
+            'year_level' => 'nullable|string|max:50',
+            'program' => 'nullable|string|max:255',
+        ]);
+
+        $student->update($validated);
+
+        return redirect()->route('student.profile')
+            ->with('success', 'Profile updated successfully!');
     }
 
     /**
