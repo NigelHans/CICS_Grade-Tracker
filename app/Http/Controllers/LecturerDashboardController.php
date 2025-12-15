@@ -229,15 +229,52 @@ class LecturerDashboardController extends Controller
             return redirect('/lecturer/dashboard')->with('error', 'Unauthorized');
         }
 
+        // Handle CSV upload
+        if ($request->hasFile('csv_file')) {
+            $validated = $request->validate([
+                'csv_file' => 'required|file|mimes:csv,txt'
+            ]);
+
+            $file = $request->file('csv_file');
+            $fileContent = file_get_contents($file->getRealPath());
+            $lines = array_filter(array_map('trim', explode("\n", $fileContent)));
+
+            foreach ($lines as $line) {
+                $parts = array_map('trim', explode(',', $line));
+                if (count($parts) >= 2) {
+                    $srCode = $parts[0];
+                    $grade = $parts[1];
+
+                    if (is_numeric($grade) && $grade >= 0 && $grade <= 100) {
+                        $student = User::where('student_id', $srCode)->first();
+                        if ($student) {
+                            $enrollment = Enrollment::where('student_id', $student->id)
+                                ->where('course_id', $courseId)
+                                ->first();
+                            
+                            if ($enrollment) {
+                                $enrollment->update(['grade' => (float) $grade]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return back()->with('success', 'Grades uploaded from CSV successfully!');
+        }
+
+        // Handle form grades
         $validated = $request->validate([
             'grades' => 'required|array',
-            'grades.*.enrollment_id' => 'required|numeric',
-            'grades.*.grade' => 'required|numeric|min:0|max:100',
+            'grades.*' => 'nullable|numeric|min:0|max:100',
         ]);
 
-        foreach ($validated['grades'] as $gradeData) {
-            Enrollment::findOrFail($gradeData['enrollment_id'])
-                ->update(['grade' => $gradeData['grade']]);
+        // Update grades for each enrollment
+        foreach ($validated['grades'] as $enrollmentId => $grade) {
+            if ($grade !== null && $grade !== '') {
+                Enrollment::findOrFail($enrollmentId)
+                    ->update(['grade' => (float) $grade]);
+            }
         }
 
         return back()->with('success', 'Grades updated successfully!');

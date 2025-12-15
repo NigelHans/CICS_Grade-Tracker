@@ -74,7 +74,6 @@
                                                 @endforeach
                                                 <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd; font-weight: 600;">%</th>
                                                 <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd; font-weight: 600;">Final Grade</th>
-                                                <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd; font-weight: 600;">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -113,9 +112,6 @@
                                                         @else
                                                             <span style="color: #999;">-</span>
                                                         @endif
-                                                    </td>
-                                                    <td style="padding: 12px; text-align: center;">
-                                                        <a href="javascript:void(0);" class="btn-edit" data-enrollment-id="{{ $student['enrollment_id'] }}" data-student-name="{{ $student['name'] }}" data-current-grade="{{ $student['grade'] ?? '' }}" style="color: #007bff; text-decoration: none; font-weight: 600; transition: color 0.2s ease;">Edit</a>
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -168,11 +164,6 @@
 
     .students-table tbody tr:hover {
         background-color: #f9f9f9;
-    }
-
-    .btn-edit:hover {
-        color: #0056b3;
-        font-weight: 700;
     }
 
     .main-content {
@@ -249,111 +240,6 @@
             // Toggle current class - handled by inline onclick
         }
     });
-
-    // Handle edit button clicks
-    document.addEventListener('click', function(event) {
-        const editBtn = event.target.closest('.btn-edit');
-        if (editBtn) {
-            event.preventDefault();
-            const enrollmentId = editBtn.getAttribute('data-enrollment-id');
-            const studentName = editBtn.getAttribute('data-student-name');
-            const currentGrade = editBtn.getAttribute('data-current-grade');
-            
-            // Show modal
-            const modal = document.getElementById('gradeEditModal');
-            document.getElementById('modalStudentName').textContent = studentName;
-            document.getElementById('gradeInput').value = currentGrade;
-            document.getElementById('enrollmentIdInput').value = enrollmentId;
-            modal.style.display = 'block';
-        }
-    });
-
-    // Close modal when X is clicked
-    document.querySelector('.close-modal').addEventListener('click', function() {
-        document.getElementById('gradeEditModal').style.display = 'none';
-    });
-
-    // Close modal when clicking outside
-    window.addEventListener('click', function(event) {
-        const modal = document.getElementById('gradeEditModal');
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
-    });
-
-    // Handle form submission
-    document.getElementById('gradeForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const enrollmentId = document.getElementById('enrollmentIdInput').value;
-        const grade = document.getElementById('gradeInput').value;
-        
-        // Validate grade
-        if (grade === '' || isNaN(grade) || grade < 0 || grade > 100) {
-            alert('Please enter a valid grade between 0 and 100');
-            return;
-        }
-        
-        // Send AJAX request
-        fetch(`/lecturer/enrollments/${enrollmentId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({
-                grade: grade
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Close modal
-                document.getElementById('gradeEditModal').style.display = 'none';
-                // Reload page to show updated grades
-                window.location.reload();
-            } else {
-                alert('Error updating grade: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error updating grade');
-        });
-    });
 </script>
-
-<!-- Grade Edit Modal -->
-<div id="gradeEditModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4);">
-    <div style="background-color: #fefefe; margin: 10% auto; padding: 30px; border: 1px solid #888; border-radius: 8px; width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="margin: 0; color: #333; font-size: 20px;">Edit Student Grade</h2>
-            <span class="close-modal" style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1;">&times;</span>
-        </div>
-        
-        <div style="margin-bottom: 20px;">
-            <p style="margin: 0 0 10px 0; color: #666; font-size: 14px;">Student Name:</p>
-            <p id="modalStudentName" style="margin: 0; font-weight: 600; color: #333; font-size: 16px;">-</p>
-        </div>
-
-        <form id="gradeForm" style="display: flex; flex-direction: column; gap: 15px;">
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-                <label for="gradeInput" style="color: #333; font-weight: 600; font-size: 14px;">Grade (0-100):</label>
-                <input type="number" id="gradeInput" name="grade" min="0" max="100" step="0.01" style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" required>
-            </div>
-            
-            <input type="hidden" id="enrollmentIdInput" name="enrollment_id">
-            
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button type="submit" style="flex: 1; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; transition: background-color 0.3s;">
-                    Save Grade
-                </button>
-                <button type="button" onclick="document.getElementById('gradeEditModal').style.display='none'" style="flex: 1; padding: 10px; background-color: #6c757d; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; transition: background-color 0.3s;">
-                    Cancel
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
 
 @endsection
