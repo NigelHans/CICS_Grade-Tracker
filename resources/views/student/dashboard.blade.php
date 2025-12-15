@@ -63,7 +63,7 @@
                             <i class="fas fa-star"></i>
                         </div>
                         <div class="stat-content">
-                            <h3>1.35</h3>
+                            <h3>{{ $gpa }}</h3>
                             <p>GPA</p>
                         </div>
                     </div>
@@ -74,7 +74,7 @@
                             <i class="fas fa-book"></i>
                         </div>
                         <div class="stat-content">
-                            <h3>{{ $enrollments->count() ?? 9 }}</h3>
+                            <h3>{{ $totalEnrolled }}</h3>
                             <p>Enrolled Courses</p>
                         </div>
                     </div>
@@ -85,7 +85,7 @@
                             <i class="fas fa-percent"></i>
                         </div>
                         <div class="stat-content">
-                            <h3>85%</h3>
+                            <h3>{{ $classCompletion }}%</h3>
                             <p>Class Completion</p>
                         </div>
                     </div>
@@ -96,7 +96,7 @@
                             <i class="fas fa-exclamation-triangle"></i>
                         </div>
                         <div class="stat-content">
-                            <h3>2</h3>
+                            <h3>{{ $atRiskCourses }}</h3>
                             <p>At Risk</p>
                         </div>
                     </div>
@@ -154,15 +154,15 @@
                             <h4 style="margin: 0;">Your Courses This Semester</h4>
                         </div>
                         <div class="card-body">
-                            @if($enrollments && $enrollments->count() > 0)
+                            @if($recentEnrollments && $recentEnrollments->count() > 0)
                                 <div class="courses-grid">
-                                    @foreach($enrollments as $enrollment)
+                                    @foreach($recentEnrollments as $enrollment)
                                         <div class="course-card-mini">
                                             <div class="course-code">{{ $enrollment->course->course_code ?? 'N/A' }}</div>
                                             <div class="course-title">{{ substr($enrollment->course->course_title ?? 'N/A', 0, 40) }}</div>
-                                            @if($enrollment->grade)
+                                            @if($enrollment->grade !== null)
                                                 <div class="course-grade" style="background-color: {{ $enrollment->grade >= 75 ? '#28a745' : ($enrollment->grade >= 60 ? '#ffc107' : '#dc3545') }};">
-                                                    {{ $enrollment->grade }}
+                                                    {{ number_format($enrollment->grade, 2) }}
                                                 </div>
                                             @else
                                                 <div class="course-grade" style="background-color: #007bff;">

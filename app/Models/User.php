@@ -28,6 +28,7 @@ class User extends Authenticatable
         'department',
         'year_level',
         'program',
+        'specialization',
     ];
 
     /**

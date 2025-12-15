@@ -18,10 +18,39 @@ class StudentDashboardController extends Controller
         $student = Auth::user();
         $enrollments = $student->enrollments()
             ->with('course')
-            ->limit(9)
             ->get();
 
-        return view('student.dashboard', compact('student', 'enrollments'));
+        // Calculate GPA
+        $gpa = $this->calculateGPA($enrollments);
+        
+        // Calculate statistics
+        $totalEnrolled = $enrollments->count();
+        $gradesRecorded = $enrollments->whereNotNull('grade')->count();
+        $classCompletion = $totalEnrolled > 0 ? round(($gradesRecorded / $totalEnrolled) * 100) : 0;
+        $atRiskCourses = $enrollments->where('grade', '<', 60)->whereNotNull('grade')->count();
+        
+        // Get recent courses (limit to 9 for dashboard display)
+        $recentEnrollments = $enrollments->take(9);
+        
+        // Get grade distribution
+        $gradeDistribution = [
+            'A' => $enrollments->whereBetween('grade', [90, 100])->count(),
+            'B' => $enrollments->whereBetween('grade', [80, 89])->count(),
+            'C' => $enrollments->whereBetween('grade', [70, 79])->count(),
+            'D' => $enrollments->whereBetween('grade', [60, 69])->count(),
+            'F' => $enrollments->where('grade', '<', 60)->count(),
+        ];
+
+        return view('student.dashboard', compact(
+            'student',
+            'enrollments',
+            'recentEnrollments',
+            'gpa',
+            'totalEnrolled',
+            'classCompletion',
+            'atRiskCourses',
+            'gradeDistribution'
+        ));
     }
 
     /**
@@ -147,42 +176,37 @@ class StudentDashboardController extends Controller
     /**
      * Calculate GPA from enrollments
      */
+    /**
+     * Calculate GPA on 1-5 scale (1 = highest/best, 5 = lowest/worst)
+     */
     private function calculateGPA($enrollments)
     {
         if ($enrollments->isEmpty()) {
             return 0;
         }
 
-        $gradePoints = [
-            'A' => 4.0, 'A-' => 3.7,
-            'B+' => 3.3, 'B' => 3.0, 'B-' => 2.7,
-            'C+' => 2.3, 'C' => 2.0, 'C-' => 1.7,
-            'D+' => 1.3, 'D' => 1.0, 'F' => 0.0
-        ];
-
         $totalPoints = 0;
         $count = 0;
 
         foreach ($enrollments as $enrollment) {
-            // Convert numeric grade to letter grade
+            // Convert numeric grade to GPA on 1-5 scale
+            // 1 = Excellent (90-100)
+            // 2 = Good (80-89)
+            // 3 = Average (70-79)
+            // 4 = Below Average (60-69)
+            // 5 = Failing (<60)
             $numericGrade = $enrollment->grade;
             
             if ($numericGrade >= 90) {
-                $gpa = 4.0;
-            } elseif ($numericGrade >= 85) {
-                $gpa = 3.7;
+                $gpa = 1.0;
             } elseif ($numericGrade >= 80) {
-                $gpa = 3.3;
-            } elseif ($numericGrade >= 75) {
-                $gpa = 3.0;
-            } elseif ($numericGrade >= 70) {
-                $gpa = 2.7;
-            } elseif ($numericGrade >= 65) {
-                $gpa = 2.3;
-            } elseif ($numericGrade >= 60) {
                 $gpa = 2.0;
+            } elseif ($numericGrade >= 70) {
+                $gpa = 3.0;
+            } elseif ($numericGrade >= 60) {
+                $gpa = 4.0;
             } else {
-                $gpa = 0.0;
+                $gpa = 5.0;
             }
 
             $totalPoints += $gpa;

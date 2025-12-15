@@ -10,21 +10,25 @@
             </div>
             <nav class="sidebar-menu">
                 <a href="{{ route('lecturer.dashboard') }}" class="sidebar-link active">
-                    <i class="fas fa-chart-line"></i> Dashboard
+                    <i class="fas fa-home"></i> Dashboard
                 </a>
-                <a href="#" class="sidebar-link">
-                    <i class="fas fa-cog"></i> Settings
+                <a href="{{ route('lecturer.profile') }}" class="sidebar-link">
+                    <i class="fas fa-user"></i> Profile
                 </a>
-                <a href="#" class="sidebar-link">
-                    <i class="fas fa-file-pdf"></i> Reports
+                <a href="{{ route('lecturer.courses') }}" class="sidebar-link">
+                    <i class="fas fa-book"></i> Courses
+                </a>
+                <a href="{{ route('lecturer.class-view') }}" class="sidebar-link">
+                    <i class="fas fa-chalkboard"></i> Class View
                 </a>
             </nav>
         </div>
 
         <!-- Main Content -->
         <div class="col-md-10 main-content">
+            <!-- Page Header -->
             <div class="page-header">
-                <h1>Lecturer Dashboard</h1>
+                <h2 style="margin: 0; color: #333;">Lecturer</h2>
                 <div class="user-logout">
                     <span>{{ $lecturer->name }}</span>
                     <form action="{{ route('lecturer.logout') }}" method="POST" style="display:inline;">
@@ -34,58 +38,110 @@
                 </div>
             </div>
 
-            <!-- Summary Stats -->
-            <div class="row stats-container">
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background-color: #6f42c1;">
-                            <i class="fas fa-book"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3>{{ $courses->count() }}</h3>
-                            <p>Courses Teaching</p>
-                        </div>
+            <!-- Profile Header Card -->
+            <div class="profile-header-card">
+                <div style="display: flex; align-items: center; gap: 30px;">
+                    <div style="width: 120px; height: 120px; background-color: rgba(255,255,255,0.3); border-radius: 10px;"></div>
+                    <div style="color: white;">
+                        <h2 style="margin: 0; font-size: 28px;">{{ $lecturer->name }}</h2>
+                        <p style="margin: 5px 0; font-size: 16px;">Position</p>
+                        <p style="margin: 5px 0; font-size: 16px;"><strong>College of Informatics and Computing Sciences</strong></p>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background-color: #007bff;">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3>{{ $totalStudents }}</h3>
-                            <p>Total Students</p>
-                        </div>
+            </div>
+
+            <!-- Dashboard Title -->
+            <h1 style="margin: 30px 0 25px 0; color: #333; font-size: 32px; font-weight: bold;">Dashboard</h1>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card-large">
+                    <h4 style="color: #666; margin: 0 0 10px 0;">Students</h4>
+                    <h2 style="color: #007bff; margin: 0; font-size: 36px; font-weight: bold;">{{ $totalStudents }}</h2>
+                    <p style="color: #999; margin: 8px 0 0 0; font-size: 13px;">First Semester A.Y. 2025</p>
+                </div>
+
+                <div class="stat-card-large">
+                    <h4 style="color: #666; margin: 0 0 10px 0;">Courses Handled</h4>
+                    <h2 style="color: #007bff; margin: 0; font-size: 36px; font-weight: bold;">{{ $courses->count() }}</h2>
+                    <p style="color: #999; margin: 8px 0 0 0; font-size: 13px;">First Semester A.Y. 2025</p>
+                </div>
+
+                <div class="stat-card-large">
+                    <h4 style="color: #666; margin: 0 0 10px 0;">Grade Completion</h4>
+                    <h2 style="color: #007bff; margin: 0; font-size: 36px; font-weight: bold;">{{ number_format($gradeCompletionRate, 0) }}%</h2>
+                    <p style="color: #999; margin: 8px 0 0 0; font-size: 13px;">Assessments Uploaded</p>
+                </div>
+
+                <div class="stat-card-large">
+                    <h4 style="color: #666; margin: 0 0 10px 0;">At Risk</h4>
+                    <h2 style="color: #007bff; margin: 0; font-size: 36px; font-weight: bold;">{{ $atRiskCount }}</h2>
+                    <p style="color: #999; margin: 8px 0 0 0; font-size: 13px;">Students performing below passing</p>
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="content-grid">
+                <!-- Average Grade Chart -->
+                <div class="card" style="grid-column: 1 / 2;">
+                    <div class="card-header">
+                        <h4 style="margin: 0;">Average grade per course</h4>
+                    </div>
+                    <div class="card-body" style="height: 300px; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
+                        <canvas id="gradeChart"></canvas>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background-color: #28a745;">
-                            <i class="fas fa-check-circle"></i>
+
+                <!-- Pending Tasks & Notifications -->
+                <div style="grid-column: 2 / 3; display: flex; flex-direction: column; gap: 20px;">
+                    <!-- Pending Tasks -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="margin: 0;">Pending Tasks</h4>
                         </div>
-                        <div class="stat-content">
-                            <h3>
-                                @php
-                                    $passRates = [];
-                                    foreach($courses as $c) {
-                                        $passRates[] = $courseStats[$c->id]['pass_rate'] ?? 0;
-                                    }
-                                    $avgPassRate = count($passRates) > 0 ? array_sum($passRates) / count($passRates) : 0;
-                                @endphp
-                                {{ number_format($avgPassRate, 1) }}%
-                            </h3>
-                            <p>Avg Pass Rate</p>
+                        <div class="card-body">
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                @forelse($pendingTasks as $task)
+                                    <li style="padding: 12px 0; border-bottom: 1px solid #eee; font-size: 14px;">
+                                        <i class="fas fa-tasks" style="color: #007bff; margin-right: 10px;"></i>
+                                        Upload grades for <strong>{{ $task['course_code'] }}</strong> ({{ $task['pending_count'] }} students)
+                                    </li>
+                                @empty
+                                    <li style="padding: 12px 0; color: #999;">
+                                        <i class="fas fa-check-circle" style="color: #28a745; margin-right: 10px;"></i>
+                                        All grades uploaded!
+                                    </li>
+                                @endforelse
+                            </ul>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background-color: #dc3545;">
-                            <i class="fas fa-exclamation-circle"></i>
+
+                    <!-- Student Notifications -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="margin: 0;">Student Notifications</h4>
                         </div>
-                        <div class="stat-content">
-                            <h3>{{ $lowPerformingStudents->count() }}</h3>
-                            <p>At-Risk Students</p>
+                        <div class="card-body">
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                @if($lowPerformingStudents->count() > 0)
+                                    @foreach($lowPerformingStudents->take(5) as $enrollment)
+                                        <li style="padding: 12px 0; border-bottom: 1px solid #eee; font-size: 14px;">
+                                            <i class="fas fa-exclamation-circle" style="color: #dc3545; margin-right: 10px;"></i>
+                                            <strong>{{ $enrollment->student->name }}</strong> (Grade: {{ $enrollment->grade }}) in {{ $enrollment->course->course_code }}
+                                        </li>
+                                    @endforeach
+                                    @if($lowPerformingStudents->count() > 5)
+                                        <li style="padding: 12px 0; color: #007bff; font-weight: bold; text-align: center;">
+                                            +{{ $lowPerformingStudents->count() - 5 }} more
+                                        </li>
+                                    @endif
+                                @else
+                                    <li style="padding: 12px 0; color: #28a745;">
+                                        <i class="fas fa-smile" style="margin-right: 10px;"></i>
+                                        All students are performing well!
+                                    </li>
+                                @endif
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -137,52 +193,64 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Low Performing Students -->
-            @if($lowPerformingStudents->count() > 0)
-                <div class="card" style="margin-top: 30px;">
-                    <div class="card-header">
-                        <h4 style="margin: 0;">Students Needing Attention (Grade < 60)</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Student Name</th>
-                                        <th>Course</th>
-                                        <th>Grade</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($lowPerformingStudents as $enrollment)
-                                        <tr>
-                                            <td>{{ $enrollment->student->name }}</td>
-                                            <td>{{ $enrollment->course->course_code }}</td>
-                                            <td>
-                                                <span class="badge" style="background-color: #dc3545; padding: 5px 10px; border-radius: 3px; color: white;">
-                                                    {{ $enrollment->grade }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <a href="{{ route('lecturer.update-grade', $enrollment->id) }}" class="btn btn-sm btn-warning">Update Grade</a>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            @endif
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('gradeChart');
+        
+        if (!ctx) {
+            console.error('gradeChart canvas not found');
+            return;
+        }
+
+        const courseLabels = @json($courses->pluck('course_code')->toArray());
+        const courseGrades = @json($courses->map(function($course) use ($courseStats) { 
+            return isset($courseStats[$course->id]) ? round($courseStats[$course->id]['average_grade'], 2) : 0;
+        })->toArray());
+
+        new Chart(ctx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: courseLabels,
+                datasets: [{
+                    label: 'Average Grade',
+                    data: courseGrades,
+                    backgroundColor: '#007bff',
+                    borderColor: '#0056b3',
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            stepSize: 10
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+
 <style>
     .sidebar-nav {
-        background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
         min-height: 100vh;
         padding: 20px 0;
         position: sticky;
@@ -242,7 +310,7 @@
         margin-bottom: 30px;
     }
 
-    .page-header h1 {
+    .page-header h2 {
         color: #333;
         font-weight: bold;
         margin: 0;
@@ -255,43 +323,40 @@
         color: #333;
     }
 
-    .stats-container {
+    .profile-header-card {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        padding: 40px;
+        border-radius: 10px;
+        color: white;
+        margin-bottom: 30px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
         gap: 20px;
         margin-bottom: 30px;
     }
 
-    .stat-card {
+    .stat-card-large {
         background: white;
-        border-radius: 8px;
-        padding: 20px;
-        display: flex;
-        align-items: center;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card-large:hover {
+        border-color: #007bff;
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 20px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        border: 1px solid #ddd;
-    }
-
-    .stat-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 24px;
-    }
-
-    .stat-content h3 {
-        margin: 0;
-        font-size: 24px;
-        color: #333;
-    }
-
-    .stat-content p {
-        margin: 5px 0 0 0;
-        color: #666;
-        font-size: 14px;
+        margin-bottom: 30px;
     }
 
     .card {
@@ -303,7 +368,7 @@
 
     .card-header {
         padding: 20px;
-        background-color: #6f42c1;
+        background-color: #007bff;
         color: white;
         border-bottom: 1px solid #ddd;
     }
@@ -405,6 +470,22 @@
 
     .badge {
         display: inline-block;
+    }
+
+    @media (max-width: 1200px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 @endsection

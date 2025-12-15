@@ -1,0 +1,249 @@
+================================================================================
+        CICS GRADE TRACKER - STUDENT AND LECTURER ACCOUNTS
+================================================================================
+
+Password for all accounts: password123
+
+================================================================================
+STUDENT ACCOUNTS (12 Total)
+================================================================================
+
+Year 1 Students (8 Courses - All Active):
+  1. Maria De Los Santos
+     Email: 23-07849@g.batstate-u.edu.ph
+     SR Code: 23-07849
+
+  2. Miguel Torres
+     Email: 23-07854@g.batstate-u.edu.ph
+     SR Code: 23-07854
+
+Year 2 Students (16 Courses Total - 8 Completed + 8 Active):
+  3. Angelo Reyes
+     Email: 23-07850@g.batstate-u.edu.ph
+     SR Code: 23-07850
+
+  4. Sofia Rodriguez
+     Email: 23-07851@g.batstate-u.edu.ph
+     SR Code: 23-07851
+
+  5. Lucia Fernandez
+     Email: 23-07855@g.batstate-u.edu.ph
+     SR Code: 23-07855
+
+  6. Camila Gutierrez
+     Email: 23-07859@g.batstate-u.edu.ph
+     SR Code: 23-07859
+
+Year 3 Students (24 Courses Total - 16 Completed + 8 Active):
+  7. Juan Carlos Santos
+     Email: 23-07848@g.batstate-u.edu.ph
+     SR Code: 23-07848
+
+  8. Carlos Mendoza
+     Email: 23-07852@g.batstate-u.edu.ph
+     SR Code: 23-07852
+
+  9. Isabella Cruz
+     Email: 23-07853@g.batstate-u.edu.ph
+     SR Code: 23-07853
+
+  10. Diego Ruiz
+      Email: 23-07856@g.batstate-u.edu.ph
+      SR Code: 23-07856
+
+Year 4 Students (32 Courses Total - 24 Completed + 8 Active):
+  11. Valentina Morales
+      Email: 23-07857@g.batstate-u.edu.ph
+      SR Code: 23-07857
+
+  12. Rafael Silva
+      Email: 23-07858@g.batstate-u.edu.ph
+      SR Code: 23-07858
+
+================================================================================
+LECTURER ACCOUNTS (4 Total)
+================================================================================
+
+  1. Princess Melo
+     Email: princessmelo@g.batstate-u.edu.ph
+     Professor Code: PROF001
+     Teaches: CS101, CS102, CS304, ENG201, ENG301
+
+  2. Dr. Robert Johnson
+     Email: robert.johnson@g.batstate-u.edu.ph
+     Professor Code: PROF002
+     Teaches: CS103, CS104, CS201, CS202, CS303, CS305, CS402, CS405, CS406
+
+  3. Maria Garcia
+     Email: maria.garcia@g.batstate-u.edu.ph
+     Professor Code: PROF003
+     Teaches: CS203, CS204, CS301, CS302, CS301, CS401, CS404
+
+  4. Prof. Michael Chen
+     Email: michael.chen@g.batstate-u.edu.ph
+     Professor Code: PROF004
+     Teaches: MATH101, MATH102, MATH201, MATH202, CS306, STAT301, CS403, ETHIC401
+
+================================================================================
+COURSES BY YEAR (32 Total - 8 Per Year)
+================================================================================
+
+YEAR 1 COURSES (100-level) - 8 Courses
+================================================================================
+
+1. CS101 - Introduction to Computer Science (3 credits)
+   Lecturer: Princess Melo | Room: A-101 | Semester: Fall 2025
+
+2. CS102 - Programming Fundamentals (4 credits)
+   Lecturer: Princess Melo | Room: A-102 | Semester: Fall 2025
+
+3. CS103 - Digital Logic (3 credits)
+   Lecturer: Dr. Robert Johnson | Room: A-103 | Semester: Fall 2025
+
+4. CS104 - Web Design Basics (3 credits)
+   Lecturer: Dr. Robert Johnson | Room: A-104 | Semester: Fall 2025
+
+5. MATH101 - Calculus I (4 credits)
+   Lecturer: Prof. Michael Chen | Room: D-101 | Semester: Fall 2025
+
+6. MATH102 - Linear Algebra (3 credits)
+   Lecturer: Prof. Michael Chen | Room: D-102 | Semester: Fall 2025
+
+7. ENG101 - English Composition (3 credits)
+   Lecturer: Princess Melo | Room: A-105 | Semester: Fall 2025
+
+8. PHY101 - General Physics I (4 credits)
+   Lecturer: Maria Garcia | Room: B-101 | Semester: Fall 2025
+
+YEAR 2 COURSES (200-level) - 8 Courses
+================================================================================
+
+1. CS201 - Data Structures (4 credits)
+   Lecturer: Dr. Robert Johnson | Room: B-201 | Semester: Fall 2025
+
+2. CS202 - Database Management Systems (3 credits)
+   Lecturer: Dr. Robert Johnson | Room: B-202 | Semester: Fall 2025
+
+3. CS203 - Computer Architecture (3 credits)
+   Lecturer: Maria Garcia | Room: B-203 | Semester: Fall 2025
+
+4. CS204 - Operating Systems (4 credits)
+   Lecturer: Maria Garcia | Room: B-204 | Semester: Fall 2025
+
+5. MATH201 - Calculus II (4 credits)
+   Lecturer: Prof. Michael Chen | Room: D-201 | Semester: Fall 2025
+
+6. MATH202 - Discrete Mathematics (3 credits)
+   Lecturer: Prof. Michael Chen | Room: D-202 | Semester: Fall 2025
+
+7. ENG201 - Technical Writing (3 credits)
+   Lecturer: Princess Melo | Room: A-201 | Semester: Fall 2025
+
+8. PHY201 - General Physics II (4 credits)
+   Lecturer: Maria Garcia | Room: B-301 | Semester: Fall 2025
+
+YEAR 3 COURSES (300-level) - 8 Courses
+================================================================================
+
+1. CS301 - Web Development (3 credits)
+   Lecturer: Maria Garcia | Room: C-301 | Semester: Fall 2025
+
+2. CS302 - Software Engineering (4 credits)
+   Lecturer: Maria Garcia | Room: C-302 | Semester: Fall 2025
+
+3. CS303 - Algorithms (3 credits)
+   Lecturer: Dr. Robert Johnson | Room: C-303 | Semester: Fall 2025
+
+4. CS304 - Mobile App Development (4 credits)
+   Lecturer: Princess Melo | Room: C-304 | Semester: Fall 2025
+
+5. CS305 - Network Security (3 credits)
+   Lecturer: Dr. Robert Johnson | Room: C-305 | Semester: Fall 2025
+
+6. CS306 - Artificial Intelligence Basics (4 credits)
+   Lecturer: Prof. Michael Chen | Room: C-306 | Semester: Fall 2025
+
+7. ENG301 - Professional Communication (3 credits)
+   Lecturer: Princess Melo | Room: A-301 | Semester: Fall 2025
+
+8. STAT301 - Probability and Statistics (3 credits)
+   Lecturer: Prof. Michael Chen | Room: D-303 | Semester: Fall 2025
+
+YEAR 4 COURSES (400-level) - 8 Courses
+================================================================================
+
+1. CS401 - Advanced Web Technologies (3 credits)
+   Lecturer: Maria Garcia | Room: D-401 | Semester: Fall 2025
+
+2. CS402 - Cloud Computing (4 credits)
+   Lecturer: Dr. Robert Johnson | Room: D-402 | Semester: Fall 2025
+
+3. CS403 - Machine Learning (4 credits)
+   Lecturer: Prof. Michael Chen | Room: D-403 | Semester: Fall 2025
+
+4. CS404 - Cybersecurity (3 credits)
+   Lecturer: Maria Garcia | Room: D-404 | Semester: Fall 2025
+
+5. CS405 - Capstone Project I (4 credits)
+   Lecturer: Princess Melo | Room: D-405 | Semester: Fall 2025
+
+6. CS406 - Capstone Project II (4 credits)
+   Lecturer: Dr. Robert Johnson | Room: D-406 | Semester: Fall 2025
+
+7. MGMT401 - IT Project Management (3 credits)
+   Lecturer: Princess Melo | Room: D-407 | Semester: Fall 2025
+
+8. ETHIC401 - IT Ethics and Society (3 credits)
+   Lecturer: Prof. Michael Chen | Room: D-408 | Semester: Fall 2025
+
+================================================================================
+ENROLLMENT PROGRESSION BY YEAR
+================================================================================
+
+YEAR 1 STUDENTS:
+  - Enrolled in: 8 Year 1 courses (all active)
+  - Total credits: 27-28
+
+YEAR 2 STUDENTS:
+  - Completed: 8 Year 1 courses
+  - Enrolled in: 8 Year 2 courses (all active)
+  - Total active credits: 27-28
+  - Total completed credits: 27-28
+
+YEAR 3 STUDENTS:
+  - Completed: 8 Year 1 + 8 Year 2 courses (16 total)
+  - Enrolled in: 8 Year 3 courses (all active)
+  - Total active credits: 26-27
+  - Total completed credits: 54-55
+
+YEAR 4 STUDENTS:
+  - Completed: 8 Year 1 + 8 Year 2 + 8 Year 3 courses (24 total)
+  - Enrolled in: 8 Year 4 courses (all active)
+  - Total active credits: 26-27
+  - Total completed credits: 80-82
+
+================================================================================
+GPA SCALE
+================================================================================
+
+1.0 = Excellent (90-100) ← BEST
+2.0 = Good (80-89)
+3.0 = Average (70-79)
+4.0 = Below Average (60-69)
+5.0 = Failing (<60) ← WORST
+
+================================================================================
+ENROLLMENT STATUS
+================================================================================
+
+- Active: Currently enrolled in the course (for current semester)
+- Completed: Course was completed in previous semesters
+
+Higher year students have completed lower-level courses from previous years
+and are currently active in courses at their year level.
+
+Year 4 students have the most comprehensive transcript with 24 completed courses!
+
+================================================================================
+Generated: December 15, 2025
+================================================================================

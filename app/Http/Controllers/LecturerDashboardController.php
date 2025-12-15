@@ -19,56 +19,138 @@ class LecturerDashboardController extends Controller
         // Get courses taught by this lecturer
         $courses = Course::where('lecturer_id', $lecturer->id)->get();
         
-        // Get course statistics
+        // Get course statistics with detailed calculations
         $courseStats = [];
+        $allEnrollments = [];
+        $allGrades = [];
+        
         foreach ($courses as $course) {
-            $enrollments = $course->enrollments()->get();
+            $enrollments = $course->enrollments()->with('student')->get();
+            $allEnrollments = array_merge($allEnrollments, $enrollments->toArray());
+            
             $grades = $enrollments->pluck('grade')->filter();
+            $allGrades = array_merge($allGrades, $grades->toArray());
+            
+            $gradeCount = $grades->count();
+            $passCount = $grades->filter(fn($g) => $g >= 60)->count();
             
             $courseStats[$course->id] = [
                 'enrolled_count' => $enrollments->count(),
-                'average_grade' => $grades->count() > 0 ? round($grades->avg(), 2) : 0,
-                'pass_rate' => $grades->count() > 0 ? round(($grades->filter(fn($g) => $g >= 60)->count() / $grades->count()) * 100, 1) : 0,
+                'average_grade' => $gradeCount > 0 ? round($grades->avg(), 2) : 0,
+                'pass_rate' => $gradeCount > 0 ? round(($passCount / $gradeCount) * 100, 1) : 0,
+                'pass_count' => $passCount,
+                'fail_count' => $gradeCount - $passCount,
             ];
         }
 
-        // Get low performing students
+        // Get low performing students (grade < 60)
         $lowPerformingStudents = Enrollment::with('student', 'course')
             ->whereIn('course_id', $courses->pluck('id'))
             ->whereNotNull('grade')
             ->where('grade', '<', 60)
-            ->limit(10)
+            ->orderBy('grade', 'asc')
             ->get();
 
+        // Calculate total students (distinct student count)
         $totalStudents = Enrollment::whereIn('course_id', $courses->pluck('id'))
             ->distinct('student_id')
             ->count('student_id');
 
-        return view('lecturer.dashboard', compact('lecturer', 'courses', 'courseStats', 'lowPerformingStudents', 'totalStudents'));
+        // Calculate overall statistics
+        $overallAverageGrade = count($allGrades) > 0 ? round(array_sum($allGrades) / count($allGrades), 2) : 0;
+        $overallPassRate = count($allGrades) > 0 ? round((count(array_filter($allGrades, fn($g) => $g >= 60)) / count($allGrades)) * 100, 1) : 0;
+        $gradeCompletionRate = $totalStudents > 0 ? round((count($allGrades) / $totalStudents) * 100, 1) : 0;
+        $atRiskCount = $lowPerformingStudents->count();
+
+        // Get pending tasks (courses without grades or with incomplete grading)
+        $pendingTasks = [];
+        foreach ($courses as $course) {
+            $enrollmentsWithoutGrades = $course->enrollments()
+                ->whereNull('grade')
+                ->count();
+            
+            if ($enrollmentsWithoutGrades > 0) {
+                $pendingTasks[] = [
+                    'course_id' => $course->id,
+                    'course_code' => $course->course_code,
+                    'pending_count' => $enrollmentsWithoutGrades,
+                ];
+            }
+        }
+
+        return view('lecturer.dashboard', compact(
+            'lecturer',
+            'courses',
+            'courseStats',
+            'lowPerformingStudents',
+            'totalStudents',
+            'overallAverageGrade',
+            'overallPassRate',
+            'gradeCompletionRate',
+            'atRiskCount',
+            'pendingTasks'
+        ));
+    }
+
+    /**
+     * Show lecturer courses page with expandable details
+     */
+    public function courses()
+    {
+        $lecturer = Auth::user();
+
+        // Get courses taught by this lecturer with all details
+        $courses = Course::where('lecturer_id', $lecturer->id)
+            ->with(['enrollments.student'])
+            ->orderBy('course_code')
+            ->get();
+
+        return view('lecturer.courses', compact('lecturer', 'courses'));
     }
 
     /**
      * Show class view with all students
      */
-    public function classView($courseId)
+    public function classView()
     {
         $lecturer = Auth::user();
-        $course = Course::findOrFail($courseId);
-
-        if ($course->lecturer_id !== $lecturer->id) {
-            return redirect('/lecturer/dashboard')->with('error', 'Unauthorized');
-        }
-
-        $students = Enrollment::with('student')
-            ->where('course_id', $courseId)
+        
+        // Get all courses for this lecturer with their enrollments and students
+        $courses = Course::where('lecturer_id', $lecturer->id)
+            ->with(['enrollments.student'])
+            ->orderBy('course_code')
             ->get();
 
-        $grades = $students->pluck('grade')->filter();
-        $classAverage = $grades->count() > 0 ? round($grades->avg(), 2) : 0;
-        $passCount = $grades->filter(fn($g) => $g >= 60)->count();
-        $failCount = $grades->filter(fn($g) => $g < 60)->count();
+        return view('lecturer.class-view', compact('lecturer', 'courses'));
+    }
 
-        return view('lecturer.class-view', compact('lecturer', 'course', 'students', 'classAverage', 'passCount', 'failCount'));
+    /**
+     * Show lecturer profile
+     */
+    public function profile()
+    {
+        $lecturer = Auth::user();
+        return view('lecturer.profile', compact('lecturer'));
+    }
+
+    /**
+     * Update lecturer profile
+     */
+    public function updateProfile(Request $request)
+    {
+        $lecturer = Auth::user();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $lecturer->id,
+            'phone' => 'nullable|string|max:20',
+            'department' => 'nullable|string|max:255',
+            'specialization' => 'nullable|string|max:255',
+        ]);
+
+        $lecturer->update($validated);
+
+        return redirect()->back()->with('success', 'Profile updated successfully!');
     }
 
     /**
@@ -231,6 +313,9 @@ class LecturerDashboardController extends Controller
         $enrollment = Enrollment::findOrFail($enrollmentId);
         
         if ($enrollment->course->lecturer_id !== $lecturer->id) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
             return redirect('/lecturer/dashboard')->with('error', 'Unauthorized');
         }
 
@@ -239,6 +324,11 @@ class LecturerDashboardController extends Controller
         ]);
 
         $enrollment->update(['grade' => $validated['grade']]);
+
+        // Check if this is an AJAX/JSON request
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Grade updated successfully!']);
+        }
 
         return redirect()->route('lecturer.class-view', $enrollment->course_id)
             ->with('success', 'Grade updated successfully!');

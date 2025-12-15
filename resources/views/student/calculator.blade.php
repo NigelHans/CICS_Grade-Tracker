@@ -46,9 +46,9 @@
                     <div class="gpa-card">
                         <h2>Your Overall GPA</h2>
                         <div class="gpa-value">{{ number_format($gpa, 2) }}</div>
-                        <p class="gpa-scale">on a 4.0 scale</p>
+                        <p class="gpa-scale">on a 1-5 scale (1=Best, 5=Worst)</p>
                         <div class="gpa-progress">
-                            <div class="progress-bar" style="width: {{ ($gpa / 4.0) * 100 }}%; background-color: {{ $gpa >= 3.5 ? '#28a745' : ($gpa >= 3.0 ? '#ffc107' : '#dc3545') }};"></div>
+                            <div class="progress-bar" style="width: {{ (1 - (($gpa - 1) / 4)) * 100 }}%; background-color: {{ $gpa <= 1.5 ? '#28a745' : ($gpa <= 2.5 ? '#ffc107' : ($gpa <= 3.5 ? '#fd7e14' : '#dc3545')) }};"></div>
                         </div>
                     </div>
 

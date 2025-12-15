@@ -82,7 +82,8 @@
             </div>
 
             <!-- Right Side - Image -->
-            <div class="hidden md:block relative bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80');">
+            <div class="hidden md:block relative bg-cover bg-center" 
+                style="background-image: url('{{ asset('images/buildings/CICS_BUILDING.png') }}');">
                 <div class="absolute inset-0 bg-blue-900/60"></div>
                 
                 <!-- Icon Overlay -->

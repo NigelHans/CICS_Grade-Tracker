@@ -39,8 +39,11 @@ Route::middleware('auth')->group(function () {
     
     // Lecturer routes
     Route::get('/lecturer/dashboard', [LecturerDashboardController::class, 'index'])->name('lecturer.dashboard');
+    Route::get('/lecturer/profile', [LecturerDashboardController::class, 'profile'])->name('lecturer.profile');
+    Route::post('/lecturer/profile/update', [LecturerDashboardController::class, 'updateProfile'])->name('lecturer.update-profile');
+    Route::get('/lecturer/courses', [LecturerDashboardController::class, 'courses'])->name('lecturer.courses');
     Route::get('/lecturer/course/{courseId}', [LecturerDashboardController::class, 'courseDetails'])->name('lecturer.course-details');
-    Route::get('/lecturer/class/{courseId}', [LecturerDashboardController::class, 'classView'])->name('lecturer.class-view');
+    Route::get('/lecturer/class', [LecturerDashboardController::class, 'classView'])->name('lecturer.class-view');
     Route::get('/lecturer/syllabus/{courseId}', [LecturerDashboardController::class, 'syllabus'])->name('lecturer.syllabus');
     Route::post('/lecturer/syllabus/{courseId}', [LecturerDashboardController::class, 'saveSyllabus'])->name('lecturer.save-syllabus');
     Route::get('/lecturer/grade-upload/{courseId}', [LecturerDashboardController::class, 'gradeUpload'])->name('lecturer.grade-upload');
